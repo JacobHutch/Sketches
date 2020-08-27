@@ -1,4 +1,5 @@
 import tkinter as tk
+#Next two lines are needed if Frame.py is in a different folder
 import sys
 sys.path.append("../../Shared/Python")
 from Frame import App
