@@ -18,7 +18,7 @@ class Program(App):
 		self.__secondNumber = ""
 
 		#Feels unecessary but I don't want to type 0s in
-		self.__buttons = ["1","2","3","4","5","6","7","8","9","0","C","CE","<","+","-","*","/","=","+/-","."]
+		self.__buttons = ["1","2","3","4","5","6","7","8","9","0","C","<","+","-","*","/","=",".","CE","+/-"]
 		self.__buttons = dict.fromkeys(self.__buttons,None)
 
 		self.__frame = tk.Frame(self._ui,bg="#CFCFCF")
@@ -84,11 +84,11 @@ class Program(App):
 		for b in self.__buttons:
 			self.__buttons[b]["font"] = ("",h)
 		self.__primaryTextBox["font"] = ("",h*2)
-		self.__secondaryTextBox["font"] = ("",h/2)
+		self.__secondaryTextBox["font"] = ("",h)
 
 	def __buttonPress(self,button):
 		try:
-			int(button)
+			float(button)
 
 			if(self.__calcPhase == 0):
 				self.__firstNumber = ""
@@ -116,6 +116,15 @@ class Program(App):
 				self.__primaryTextBox["text"] = self.__firstNumber
 				self.__secondaryTextBox["text"] = ""
 
+			if(button == "CE"):
+				if(self.__calcPhase == 1):
+					self.__firstNumber = ""
+					self.__primaryTextBox["text"] = "0"
+
+				if((self.__calcPhase == 2) or (self.__calcPhase == 3)):
+					self.__secondNumber = "0"
+					self.__primaryTextBox["text"] = self.__secondNumber
+
 			if((button == "+") or (button == "-") or (button == "*") or (button == "/")):
 				if(self.__calcPhase == 1):
 					self.__calcPhase = 2
@@ -128,7 +137,7 @@ class Program(App):
 					self.__secondaryTextBox["text"] = self.__firstNumber
 
 			if(button == "="):
-				if(self.__calcPhase == 3):
+				if((self.__calcPhase == 2) or (self.__calcPhase == 3)):
 					self.__calcPhase = 0
 					self.__firstNumber += self.__secondNumber
 					self.__primaryTextBox["text"] = eval(self.__firstNumber)
@@ -140,7 +149,7 @@ class Program(App):
 					self.__firstNumber = "-" + self.__firstNumber
 					self.__primaryTextBox["text"] = self.__firstNumber
 
-				elif(self.__calcPhase == 3):
+				elif((self.__calcPhase == 2) or (self.__calcPhase == 3)):
 					self.__secondNumber = "-" + self.__secondNumber
 					self.__primaryTextBox["text"] = self.__secondNumber
 
