@@ -26,7 +26,7 @@ class System:
         return (((a.position[0] - b.position[0]) ** 2) + ((a.position[1] - b.position[1]) ** 2)) ** 0.5
 
     def updateBoids(self):
-        avoidFactor = 0.05
+        avoidFactor = 0.2
         centerFactor = 0.005
         alignFactor = 0.05
 
@@ -41,6 +41,12 @@ class System:
             alignSin = 0
             count = 0
             avoidCount = 0
+
+            if boid.position[0] > 1000 or boid.position[0] < 0 or boid.position[1] > 1000 or boid.position[1] < 0:
+                barrier = 180
+            else:
+                barrier = 0
+        
             for other in self.boids:
                 if (boid != other) and (self.distance(boid,other) < self.radius):
                     count += 1
@@ -65,11 +71,16 @@ class System:
                 avoidY /= avoidCount
                 avoid = (math.degrees(math.atan2(boid.position[1] - avoidY,boid.position[0] - avoidX)) + 360) % 360
                 t1 = avoid - boid.angle
-                t2 = 360 - abs(t1)
+                if t1 > 0:
+                    t2 = abs(t1) - 360
+                else:
+                    t2 = 360 - abs(t1)
                 if abs(t1) > abs(t2):
                     avoid = t2
-                else:
+                elif abs(t2) > abs(t1):
                     avoid = t1
+                else:
+                    avoid = random.choice([t1,t2])
             else:
                 avoid = 0
                     
@@ -79,27 +90,37 @@ class System:
                 avgY /= (count + 1)
                 center = (math.degrees(math.atan2(avgY - boid.position[1],avgX - boid.position[0])) + 360) % 360
                 t1 = center - boid.angle
-                t2 = 360 - abs(t1)
+                if t1 > 0:
+                    t2 = abs(t1) - 360
+                else:
+                    t2 = 360 - abs(t1)
                 if abs(t1) > abs(t2):
                     center = t2
-                else:
+                elif abs(t2) > abs(t1):
                     center = t1
+                else:
+                    center = random.choice([t1,t2])
 
                 #align calc
                 alignCos /= count
                 alignSin /= count
                 align = (math.degrees(math.atan2(alignSin,alignCos)) + 360) % 360
                 t1 = align - boid.angle
-                t2 = 360 - abs(t1)
+                if t1 > 0:
+                    t2 = abs(t1) - 360
+                else:
+                    t2 = 360 - abs(t1)
                 if abs(t1) > abs(t2):
                     align = t2
-                else:
+                elif abs(t2) > abs(t1):
                     align = t1
+                else:
+                    align = random.choice([t1,t2])
 
             #combine and calculate final movement
-                newAngle = (boid.angle + (avoid * avoidFactor) + (center * centerFactor) + (align * alignFactor)) % 360
+                newAngle = (boid.angle + barrier + (avoid * avoidFactor) + (center * centerFactor) + (align * alignFactor)) % 360
             else:
-                newAngle = boid.angle
+                newAngle = boid.angle + barrier
             newPos = (boid.position[0] + (boid.velocity / self.tick * math.cos(math.radians(newAngle))),boid.position[1] + (boid.velocity / self.tick * math.sin(math.radians(newAngle))))
             boid.update(newPos,newAngle)
 
@@ -153,8 +174,8 @@ class App:
             pygame.display.flip()
             self.clock.tick(self.tick)
 
-boidOps = {"velocity":75}
-sysOps = {"amount":100,"size":5,"length":20,"radius":100,"collisionRadius":20,"tick":30}
+boidOps = {"velocity":100}
+sysOps = {"amount":100,"size":5,"length":20,"radius":100,"collisionRadius":20,"tick":60}
 appOps = {"winSize":(1000,1000)}
 
 a = App(boidOps,sysOps,**appOps)

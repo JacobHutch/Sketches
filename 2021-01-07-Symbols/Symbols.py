@@ -97,7 +97,7 @@ class App:
             pygame.display.flip()
             self.clock.tick(10)
 
-symbolOps = {"letterWidth":4,"letterHeight":6}
+symbolOps = {"letterWidth":12,"letterHeight":6}
 appOps = {"winSize":(1000,1000)}
 
 a = App(symbolOps,**appOps)
