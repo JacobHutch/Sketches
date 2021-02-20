@@ -30,7 +30,7 @@ class System:
         centerFactor = 0.005
         alignFactor = 0.05
 
-        for boid in self.boids:            
+        for boid in self.boids:
             avoidX = 0
             avoidY = 0
             avgX = boid.position[0]
@@ -46,11 +46,11 @@ class System:
                 barrier = 180
             else:
                 barrier = 0
-        
+
             for other in self.boids:
                 if (boid != other) and (self.distance(boid,other) < self.radius):
                     count += 1
-                    
+
                     #avoid data
                     if self.distance(boid,other) < self.collisionRadius:
                         avoidCount += 1
@@ -83,7 +83,7 @@ class System:
                     avoid = random.choice([t1,t2])
             else:
                 avoid = 0
-                    
+
             if count != 0:
                 #center calc
                 avgX /= (count + 1)
@@ -160,12 +160,12 @@ class App:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     self.running = False
-                    
+
             if not self.running:
                 break
 
             self.window.fill("white")
-            
+
             #boid update
             self.system.updateBoids()
             for boid in self.system.boids:

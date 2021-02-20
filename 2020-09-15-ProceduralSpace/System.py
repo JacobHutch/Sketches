@@ -3,8 +3,7 @@ import math
 from Star import Star
 from Planet import Planet
 class System:
-	def __init__(self,recursion=2,minbodies=0,maxbodies=10):
-		self.__recursion = recursion
+	def __init__(self,minbodies=0,maxbodies=10):
 		self.__minBodies = minbodies
 		self.__maxBodies = maxbodies
 		self.__gravityConstant = 0.01
@@ -56,4 +55,4 @@ class System:
 					acceleration[1] += (math.sin(direction) * -self.__gravityConstant * pData[0] / distanceSqrd)
 			self.__bodies[b].updatePos(acceleration)
 
-s = System(2,0,10)
+s = System(0,10)

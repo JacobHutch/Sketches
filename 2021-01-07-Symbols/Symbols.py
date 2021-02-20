@@ -17,7 +17,7 @@ class SymbolMaker:
             self.xOffset = (self.letterHeight - self.letterWidth + 2) / 2
             self.yOffset = 1
         self.edgeLength = min(winSize) / (max(self.letterWidth,self.letterHeight) + 1)
-        
+
     def genLetter(self):
         nodeAmt = random.randint(1,self.letterSize-1)
         nodesChoice = []
@@ -80,7 +80,7 @@ class App:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     self.running = False
-                    
+
             if not self.running:
                 break
 
@@ -93,7 +93,7 @@ class App:
             if self.drawVerts:
                 for node in self.maker.getNodes():
                     pygame.draw.circle(self.window,(0,0,0),node,3)
-                    
+
             pygame.display.flip()
             self.clock.tick(10)
 
