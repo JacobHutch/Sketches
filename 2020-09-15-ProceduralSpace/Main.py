@@ -12,9 +12,9 @@ class App:
 
         self.__xdis = winSize[0]//2
         self.__ydis = winSize[1]//2
-        self.__zoomScale = 1
+        self.__zoomScale = 0.5
         self.__zoomStep = 1.1
-        self.__system = System(1,3)
+        self.__system = System(50,90)
 
         pygame.init()
         self.window = pygame.display.set_mode(winSize)

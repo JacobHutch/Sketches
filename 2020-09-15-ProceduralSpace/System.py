@@ -46,13 +46,13 @@ class System:
 		acceleration = [0,0]
 		for b in range(1,len(self.__bodies)):
 			bData = self.__bodies[b].getData()
-			for p in range(len(self.__bodies)):
-				if p != b:
-					pData = self.__bodies[p].getData()
-					distanceSqrd = ((bData[2][0] - pData[2][0]) ** 2) + ((bData[2][1] - pData[2][1]) ** 2)
-					direction = math.atan2((bData[2][1] - pData[2][1]), (bData[2][0] - pData[2][0]))
-					acceleration[0] += (math.cos(direction) * -self.__gravityConstant * pData[0] / distanceSqrd)
-					acceleration[1] += (math.sin(direction) * -self.__gravityConstant * pData[0] / distanceSqrd)
+			'''for p in range(len(self.__bodies)):
+				if p != b:'''
+			pData = self.__bodies[0].getData()
+			distanceSqrd = ((bData[2][0] - pData[2][0]) ** 2) + ((bData[2][1] - pData[2][1]) ** 2)
+			direction = math.atan2((bData[2][1] - pData[2][1]), (bData[2][0] - pData[2][0]))
+			acceleration[0] += (math.cos(direction) * -self.__gravityConstant * pData[0] / distanceSqrd)
+			acceleration[1] += (math.sin(direction) * -self.__gravityConstant * pData[0] / distanceSqrd)
 			self.__bodies[b].updatePos(acceleration)
 
 s = System(0,10)

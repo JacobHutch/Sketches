@@ -7,7 +7,7 @@ class Planet(Body):
 		self.colorGen()
 
 	def dataGen(self):
-		self._mass = random.randint(10,20)
+		self._mass = random.uniform(10,20)
 		self._radius = random.randint(10,20)
 		self._position = [random.randint(-500,500),random.randint(-500,500)]
 		self._velocity = [random.uniform(0,1),random.uniform(0,1)]
