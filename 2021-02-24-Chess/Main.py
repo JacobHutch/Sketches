@@ -8,18 +8,12 @@ class App:
         self.clock = pygame.time.Clock()
         self.tick = tick
 
-        self.colorModifier = ""
-        self.colors = {}
-        self.colors["bgColor"] = (64,64,128)
-        self.colors["white"] = (255,230,180)
-        self.colors["black"] = (32,32,32)
-        self.colors["h-mouse"] = (255,255,255,0.4)
-        self.colors["h-move"] = (255,255,0,0.5)
-        self.colors["h-attack"] = (255,0,0,0.75)
         self.compositeColors()
 
         self.lastX = 0
         self.lastY = 0
+
+        self.playerCol = "w"
 
         self.board = Board()
 
@@ -31,26 +25,65 @@ class App:
         self.mainloop()
 
 
-
+    # The color system might be kinda confusing, so it could be changed later.
+    # colorPalette defines the base colors for the program; bgColor, white, and
+    # black are self explanatory, highlight is the color of a square when the
+    # mouse moves over it, and the rest (marked with "m-") are modifiers.
+    #
+    # compositeColors() creates the true color palette for the program, with
+    # colors holding 2 * 2 * m, with m being the number of modifiers. See
+    # parseColor() for details about referencing each color.
     def compositeColors(self):
-        wr,wg,wb = self.colors["white"]
-        br,bg,bb = self.colors["black"]
-        newColors = []
-        for c in self.colors:
-            if c[0:2] == "h-":
-                r,g,b,a = self.colors[c]
+        self.colorPalette = {}
+        self.colorPalette["bgColor"] = (64,64,128)
+        self.colorPalette["white"] = (255,230,180)
+        self.colorPalette["black"] = (64,64,46)
+        self.colorPalette["highlight"] = (255,255,255,0.2)
+        self.colorPalette["m-none"] = (0,0,0,0.0)
+        self.colorPalette["m-move"] = (255,255,0,0.5)
+        self.colorPalette["m-attack"] = (255,0,0,0.75)
+        self.colorPalette["m-special"] = (0,64,255,0.75)
+
+        self.colors = []
+
+        wr,wg,wb = self.colorPalette["white"]
+        br,bg,bb = self.colorPalette["black"]
+        hr,hg,hb,ha = self.colorPalette["highlight"]
+        for c in self.colorPalette:
+            if c[:2] == "m-":
+                r,g,b,a = self.colorPalette[c]
                 r = round((wr * (1 - a)) + (r * a))
                 g = round((wg * (1 - a)) + (g * a))
                 b = round((wb * (1 - a)) + (b * a))
-                newColors.append(["white"+c[2:], (r,g,b)])
+                self.colors.append((r,g,b))
 
-                r,g,b,a = self.colors[c]
+                r = round((r * (1 - ha)) + (hr * ha))
+                g = round((g * (1 - ha)) + (hg * ha))
+                b = round((b * (1 - ha)) + (hb * ha))
+                self.colors.append((r,g,b))
+
+                r,g,b,a = self.colorPalette[c]
                 r = round((br * (1 - a)) + (r * a))
                 g = round((bg * (1 - a)) + (g * a))
                 b = round((bb * (1 - a)) + (b * a))
-                newColors.append(["black"+c[2:], (r,g,b)])
-        for c in newColors:
-            self.colors[c[0]] = c[1]
+                self.colors.append((r,g,b))
+
+                r = round((r * (1 - ha)) + (hr * ha))
+                g = round((g * (1 - ha)) + (hg * ha))
+                b = round((b * (1 - ha)) + (hb * ha))
+                self.colors.append((r,g,b))
+        for i,j in enumerate(self.colors):
+            print(i,j)
+
+
+    # In board, colors are stored as a list, shown here with ranges:
+    # [0:1, 0:1, 0:(m-1)] where m stands for the number of color modifiers.
+    # list[0] stands for whether or not the square is highlighted, list[1]
+    # means white or black, and list[2] is which modifier is active.
+    # combining these bitwise as shown below will create an index for the
+    # correct color combination of the 3 values.
+    def parseColor(self,colorData):
+        return self.colors[(colorData[2] << 2) | (colorData[1] << 1) | colorData[0]]
 
 
 
@@ -64,12 +97,12 @@ class App:
 
 
     def display(self):
-        self.window.fill(self.colors["bgColor"])
+        self.window.fill(self.colorPalette["bgColor"])
         for x in range(8):
             for y in range(8):
                 rect = ((x * self.squareSize) + self.xOffset, (y * self.squareSize) + self.yOffset,
                     self.squareSize, self.squareSize)
-                pygame.draw.rect(self.window,self.colors[self.board.colors[x][y]],rect)
+                pygame.draw.rect(self.window,self.parseColor(self.board.colors[x][y]),rect)
         self.images.blit(self.board.blit())
 
 
@@ -90,7 +123,9 @@ class App:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x,y = event.pos
-                    print((x - self.xOffset) // self.squareSize, (y - self.yOffset) // self.squareSize)
+                    x,y = (x - self.xOffset) // self.squareSize, (y - self.yOffset) // self.squareSize
+                    if (x >= 0) and (x <= 7) and (y >= 0) and (y <= 7):
+                        self.board.selectSquare([x,y])#,self.playerCol)
 
                 if event.type == pygame.VIDEORESIZE:
                     self.resize(self.window.get_size())
@@ -102,12 +137,13 @@ class App:
             x = (x - self.xOffset) // self.squareSize
             y = (y - self.yOffset) // self.squareSize
             if (x >= 0) and (x <= 7) and (y >= 0) and (y <= 7):
-                self.board.colors[self.lastX][self.lastY] = self.board.colors[self.lastX][self.lastY][0:5]
-                self.board.colors[x][y] += "mouse"
-                self.lastX = x
-                self.lastY = y
+                self.board.colors[self.lastX][self.lastY][0] = 0
+                if self.board.colors[x][y][0] == 0:
+                    self.board.colors[x][y][0] = 1
+                    self.lastX = x
+                    self.lastY = y
             else:
-                self.board.colors[self.lastX][self.lastY] = self.board.colors[self.lastX][self.lastY][0:5]
+                self.board.colors[self.lastX][self.lastY][0] = 0
 
             self.display()
             pygame.display.flip()
