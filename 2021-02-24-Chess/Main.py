@@ -40,9 +40,9 @@ class App:
         self.colorPalette["black"] = (64,64,46)
         self.colorPalette["highlight"] = (255,255,255,0.2)
         self.colorPalette["m-none"] = (0,0,0,0.0)
-        self.colorPalette["m-move"] = (255,255,0,0.5)
+        self.colorPalette["m-move"] = (0,128,255,0.5)
         self.colorPalette["m-attack"] = (255,0,0,0.75)
-        self.colorPalette["m-special"] = (0,64,255,0.75)
+        self.colorPalette["m-special"] = (0,255,0,0.5)
 
         self.colors = []
 
@@ -72,8 +72,8 @@ class App:
                 g = round((g * (1 - ha)) + (hg * ha))
                 b = round((b * (1 - ha)) + (hb * ha))
                 self.colors.append((r,g,b))
-        for i,j in enumerate(self.colors):
-            print(i,j)
+        '''for i,j in enumerate(self.colors):
+            print(i,j)'''
 
 
     # In board, colors are stored as a list, shown here with ranges:
@@ -88,6 +88,7 @@ class App:
 
 
     def resize(self,winSize):
+        print(winSize)
         self.padding = int(math.log(min(winSize),2))
         self.squareSize = (min(winSize) - self.padding) // 8
         self.xOffset = (winSize[0] - (self.squareSize * 8)) // 2
@@ -113,6 +114,8 @@ class App:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_q]:
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
+            if keys[pygame.K_r]:
+                self.resize(self.window.get_size())
 
             #event processing
             for event in pygame.event.get():
@@ -128,7 +131,7 @@ class App:
                         self.board.selectSquare([x,y])#,self.playerCol)
 
                 if event.type == pygame.VIDEORESIZE:
-                    self.resize(self.window.get_size())
+                    self.resize([event.w,event.h])
 
             if not self.running:
                 break

@@ -8,9 +8,11 @@ class Piece:
         else:
             self.forward = -1
         self.type = id[1]
+        self.number = int(id[2])
         self.numMoves = 0
         self.moves = []
         self.attacks = []
+        self.special = []
         self.dangers = []
 
 
@@ -32,25 +34,51 @@ class Piece:
 
 
     # Left to implement:
-    # Pawn: collision checking, attack, en passant, promotion
+    # Pawn: en passant
     # Rook: castle
-    # Bishop: Movement/attack
-    # Knight: Movement/attack
-    # Queen: Movement/attack
-    # King: Movement/attack, check, castle
+    # Bishop: Done
+    # Knight: Done
+    # Queen: Done
+    # King: check, castle
+    #
+    # As a side note, this feels like a terribly inefficient way to implement
+    # some of these movements, so it might change later (especially if the
+    # AI is slow because of it)
     def findMoves(self):
         self.moves = []
         self.attacks = []
+        self.special = []
         self.dangers = []
         x,y = self.pos
         if self.type == "p":
-            #movement
-            if self.grid[x][y + self.forward] == None:
-                self.moves.append([x, y + self.forward])
-                if (self.grid[x][y + (2 * self.forward)] == None) and self.numMoves == 0:
-                    self.moves.append([x, y + (2 * self.forward)])
+            if (y + self.forward >= 0) and (y + self.forward < 8):
+                #movement
+                if (self.grid[x][y + self.forward] == None):
+                    self.moves.append([x, y + self.forward])
+                    if (self.numMoves == 0) and (self.grid[x][y + (2 * self.forward)] == None):
+                        self.moves.append([x, y + (2 * self.forward)])
 
-        elif self.type == "r":
+                #attack
+                if (x+1 < 8) and (self.grid[x+1][y+self.forward]):
+                    self.findAttack([x + 1, y + self.forward])
+                if (x-1 >= 0) and (self.grid[x-1][y+self.forward]):
+                    self.findAttack([x - 1, y + self.forward])
+
+                #promotion
+                if ((y == 1) and (self.forward == -1)):
+                    self.special.append([x,0])
+                    if (x+1 < 8):
+                        self.special.append([x+1,0])
+                    if (x-1 >= 0):
+                        self.special.append([x-1,0])
+                if ((y == 6) and (self.forward == 1)):
+                    self.special.append([x,7])
+                    if (x+1 < 8):
+                        self.special.append([x+1,7])
+                    if (x-1 >= 0):
+                        self.special.append([x-1,7])
+
+        elif (self.type == "r"):
             for i in range(x+1,8):
                 if self.grid[i][y] == None:
                     self.moves.append([i,y])
@@ -80,16 +108,117 @@ class Piece:
                     break
 
         elif self.type == "h":
-            pass
+            moves = [(x+1,y+2),(x+1,y-2),(x-1,y+2),(x-1,y-2),(x+2,y+1),(x+2,y-1),(x-2,y+1),(x-2,y-1)]
+            for m in moves:
+                if (m[0] >= 0) and (m[0] < 8) and (m[1] >= 0) and (m[1] < 8):
+                    if self.grid[m[0]][m[1]] == None:
+                        self.moves.append([m[0],m[1]])
+                    else:
+                        self.findAttack([m[0],m[1]])
 
         elif self.type == "b":
-            pass
+            for i in range(x+1,8):
+                if (y+i-x) < 8:
+                    if self.grid[i][y+i-x] == None:
+                        self.moves.append([i,y+i-x]);
+                    else:
+                        self.findAttack([i,y+i-x])
+                        break
+
+            for i in range(x-1,-1,-1):
+                if (y+i-x) >= 0:
+                    if self.grid[i][y+i-x] == None:
+                        self.moves.append([i,y+i-x]);
+                    else:
+                        self.findAttack([i,y+i-x])
+                        break
+
+            for i in range(x+1,8):
+                if (y-i+x) >= 0:
+                    if self.grid[i][y-i+x] == None:
+                        self.moves.append([i,y-i+x]);
+                    else:
+                        self.findAttack([i,y-i+x])
+                        break
+
+            for i in range(x-1,-1,-1):
+                if (y-i+x) < 8:
+                    if self.grid[i][y-i+x] == None:
+                        self.moves.append([i,y-i+x]);
+                    else:
+                        self.findAttack([i,y-i+x])
+                        break
 
         elif self.type == "q":
-            pass
+            for i in range(x+1,8):
+                if self.grid[i][y] == None:
+                    self.moves.append([i,y])
+                else:
+                    self.findAttack([i,y])
+                    break
+
+            for i in range(x-1,-1,-1):
+                if self.grid[i][y] == None:
+                    self.moves.append([i,y])
+                else:
+                    self.findAttack([i,y])
+                    break
+
+            for i in range(y+1,8):
+                if self.grid[x][i] == None:
+                    self.moves.append([x,i])
+                else:
+                    self.findAttack([x,i])
+                    break
+
+            for i in range(y-1,-1,-1):
+                if self.grid[x][i] == None:
+                    self.moves.append([x,i])
+                else:
+                    self.findAttack([x,i])
+                    break
+
+            for i in range(x+1,8):
+                if (y+i-x) < 8:
+                    if self.grid[i][y+i-x] == None:
+                        self.moves.append([i,y+i-x]);
+                    else:
+                        self.findAttack([i,y+i-x])
+                        break
+
+            for i in range(x-1,-1,-1):
+                if (y+i-x) >= 0:
+                    if self.grid[i][y+i-x] == None:
+                        self.moves.append([i,y+i-x]);
+                    else:
+                        self.findAttack([i,y+i-x])
+                        break
+
+            for i in range(x+1,8):
+                if (y-i+x) >= 0:
+                    if self.grid[i][y-i+x] == None:
+                        self.moves.append([i,y-i+x]);
+                    else:
+                        self.findAttack([i,y-i+x])
+                        break
+
+            for i in range(x-1,-1,-1):
+                if (y-i+x) < 8:
+                    if self.grid[i][y-i+x] == None:
+                        self.moves.append([i,y-i+x]);
+                    else:
+                        self.findAttack([i,y-i+x])
+                        break
 
         elif self.type == "k":
-            pass
+            moves = [(x+1,y+1),(x+1,y),(x+1,y-1),(x,y-1),(x-1,y-1),(x-1,y),(x-1,y+1),(x,y+1)]
+            for m in moves:
+                if (m[0] >= 0) and (m[0] < 8) and (m[1] >= 0) and (m[1] < 8):
+                    if self.grid[m[0]][m[1]] == None:
+                        self.moves.append([m[0],m[1]])
+                    else:
+                        self.findAttack([m[0],m[1]])
+
 
         self.communicateDangers()
 
@@ -116,6 +245,10 @@ class Piece:
         self.grid[self.pos[0]][self.pos[1]] = None
         if self.grid[x][y]:
             self.attack(newpos)
+        if newpos in self.special:
+            if self.type == "p":
+                self.type = "q"
+                self.id = self.color + self.type + str(self.number)
         self.grid[x][y] = self
         self.pos = newpos
         self.numMoves += 1
@@ -141,6 +274,7 @@ class Piece:
 #   per side, "wk1" and "bk1", there will be 8 pawns, "wp1"-"wp8"
 class Board:
     def __init__(self):
+        self.turn = "w"
         self.selected = None
         self.colors = [[([0,0,0] if (x + y) % 2 == 0 else [0,1,0]) for y in range(8)] for x in range(8)]
         self.grid = [[None for y in range(8)] for x in range(8)]
@@ -183,6 +317,8 @@ class Board:
                         x,y = m
                         if m in self.selected.attacks:
                             self.colors[x][y][2] = 2
+                        elif m in self.selected.special:
+                            self.colors[x][y][2] = 3
                         else:
                             self.colors[x][y][2] = 1
                     print("ding")
@@ -204,6 +340,10 @@ class Board:
                     self.colors[x][y][2] = 0
                 self.selected.move(pos)
                 self.updateMoves()
+                if self.turn == "w":
+                    self.turn = "b"
+                else:
+                    self.turn = "w"
                 self.selected = None
                 print("bong")
             else:
