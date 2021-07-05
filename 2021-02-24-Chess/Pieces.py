@@ -1,3 +1,4 @@
+import random as rand
 class Piece:
     def __init__(self,grid,id):
         self.grid = grid
@@ -14,6 +15,10 @@ class Piece:
         self.attacks = []
         self.special = []
         self.dangers = []
+
+        self.score = 0
+        self.highestScoreMove = [0,0]
+        self.values = {"p":1, "r":2, "h":3, "b":4, "q":5, "k":6}
 
 
 
@@ -36,8 +41,8 @@ class Piece:
     # Left to implement:
     # Pawn: en passant
     # Rook: castle
-    # Bishop: Done
     # Knight: Done
+    # Bishop: Done
     # Queen: Done
     # King: check, castle
     #
@@ -264,105 +269,22 @@ class Piece:
 
 
 
+    def findHighestScore(self):
+        self.score = 0
+        tempScore = 0
 
+        for a in self.attacks:
+            x,y = a
+            tempScore = self.values[self.grid[x][y].type] + 1
+            if tempScore > self.score:
+                self.score = tempScore
+                self.highestScoreMove = a
 
-# Piece ids: string of 3 chars, "ct#"
-# c is color, either 'w' or 'b'
-# t is type, 'p' = pawn, 'r' = rook, 'h' = knight (horse), 'b' = bishop,
-#   'q' = queen, 'k' = king
-# # is the unique number for each piece, so while there will only be one king
-#   per side, "wk1" and "bk1", there will be 8 pawns, "wp1"-"wp8"
-class Board:
-    def __init__(self):
-        self.turn = "w"
-        self.selected = None
-        self.colors = [[([0,0,0] if (x + y) % 2 == 0 else [0,1,0]) for y in range(8)] for x in range(8)]
-        self.grid = [[None for y in range(8)] for x in range(8)]
-
-        for i in range(8):
-            self.grid[i][1] = Piece(self.grid, "wp" + str(i+1))
-            self.grid[i][6] = Piece(self.grid, "bp" + str(i+1))
-
-        for i in range(2):
-            self.grid[i * 7][0] = Piece(self.grid, "wr" + str(i+1))
-            self.grid[(i * 5) + 1][0] = Piece(self.grid, "wh" + str(i+1))
-            self.grid[(i * 3) + 2][0] = Piece(self.grid, "wb" + str(i+1))
-            self.grid[i * 7][7] = Piece(self.grid, "br" + str(i+1))
-            self.grid[(i * 5) + 1][7] = Piece(self.grid, "bh" + str(i+1))
-            self.grid[(i * 3) + 2][7] = Piece(self.grid, "bb" + str(i+1))
-
-        self.grid[4][0] = Piece(self.grid, "wq1")
-        self.grid[3][0] = Piece(self.grid, "wk1")
-        self.grid[4][7] = Piece(self.grid, "bq1")
-        self.grid[3][7] = Piece(self.grid, "bk1")
-
-        #Captured pieces, white then black
-        self.grid.append([[],[]])
-        for x in self.grid:
-            for y in x:
-                if y:
-                    y.initPos()
+        if (self.score == 0) and (len(self.moves) > 0):
+            self.score = 1
+            self.highestScoreMove = rand.choice(self.moves)
 
 
 
-    def selectSquare(self,pos):#,playerCol):
-        x,y = pos
-        if self.selected == None:
-            if self.grid[x][y]:
-                if self.grid[x][y].color:# == playerCol:
-                    self.selected = self.grid[x][y]
-                    x,y = self.selected.pos
-                    self.colors[x][y][2] = 1
-                    for m in self.selected.moves:
-                        x,y = m
-                        if m in self.selected.attacks:
-                            self.colors[x][y][2] = 2
-                        elif m in self.selected.special:
-                            self.colors[x][y][2] = 3
-                        else:
-                            self.colors[x][y][2] = 1
-                    print("ding")
-
-        else:
-            if self.selected == self.grid[x][y]:
-                x,y = self.selected.pos
-                self.colors[x][y][2] = 0
-                for m in self.selected.moves:
-                    x,y = m
-                    self.colors[x][y][2] = 0
-                self.selected = None
-                print("dong")
-            elif pos in self.selected.moves:
-                x,y = self.selected.pos
-                self.colors[x][y][2] = 0
-                for m in self.selected.moves:
-                    x,y = m
-                    self.colors[x][y][2] = 0
-                self.selected.move(pos)
-                self.updateMoves()
-                if self.turn == "w":
-                    self.turn = "b"
-                else:
-                    self.turn = "w"
-                self.selected = None
-                print("bong")
-            else:
-                print("invalid")
-
-
-
-    def updateMoves(self):
-        for x in range(8):
-            for y in range(8):
-                if self.grid[x][y]:
-                    self.grid[x][y].findMoves()
-
-
-
-    def blit(self):
-        ret = []
-        for x in range(8):
-            for y in range(8):
-                if self.grid[x][y]:
-                    ret.append([self.grid[x][y].id[:-1],x,y])
-        return ret
+    def moveHighestScore(self):
+        self.move(self.highestScoreMove)

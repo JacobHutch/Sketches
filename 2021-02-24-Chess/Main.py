@@ -1,6 +1,7 @@
-import pygame, math
+import pygame, math, time
 from Images import Images
-from Pieces import Piece, Board
+from Board import Board
+#from Pieces import Piece, Board
 
 class App:
     def __init__(self,name="Pygame App",winSize=(500,500),tick=60):
@@ -10,10 +11,10 @@ class App:
 
         self.compositeColors()
 
+        self.playerCol = "w"
+
         self.lastX = 0
         self.lastY = 0
-
-        self.playerCol = "w"
 
         self.board = Board()
 
@@ -90,9 +91,9 @@ class App:
     def resize(self,winSize):
         print(winSize)
         self.padding = int(math.log(min(winSize),2))
-        self.squareSize = (min(winSize) - self.padding) // 8
+        self.squareSize = (min(winSize) - self.padding) // 9
         self.xOffset = (winSize[0] - (self.squareSize * 8)) // 2
-        self.yOffset = (winSize[1] - (self.squareSize * 8)) // 2
+        self.yOffset = (winSize[1] - (self.squareSize * 9)) // 2
         self.images.updateSize(self.squareSize,self.xOffset,self.yOffset)
 
 
@@ -105,6 +106,7 @@ class App:
                     self.squareSize, self.squareSize)
                 pygame.draw.rect(self.window,self.parseColor(self.board.colors[x][y]),rect)
         self.images.blit(self.board.blit())
+        pygame.display.flip()
 
 
 
@@ -128,7 +130,11 @@ class App:
                     x,y = event.pos
                     x,y = (x - self.xOffset) // self.squareSize, (y - self.yOffset) // self.squareSize
                     if (x >= 0) and (x <= 7) and (y >= 0) and (y <= 7):
-                        self.board.selectSquare([x,y])#,self.playerCol)
+                        if self.board.selectSquare([x,y]) == 1:
+                            self.display()
+                            time.sleep(0.5)
+                            self.board.opponent.move()
+                            self.board.updateMoves()
 
                 if event.type == pygame.VIDEORESIZE:
                     self.resize([event.w,event.h])
@@ -149,7 +155,6 @@ class App:
                 self.board.colors[self.lastX][self.lastY][0] = 0
 
             self.display()
-            pygame.display.flip()
             pygame.event.pump()
             self.clock.tick(self.tick)
 

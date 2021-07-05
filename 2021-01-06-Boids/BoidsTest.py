@@ -174,8 +174,8 @@ class App:
             pygame.display.flip()
             self.clock.tick(self.tick)
 
-boidOps = {"velocity":100}
-sysOps = {"amount":100,"size":5,"length":20,"radius":100,"collisionRadius":20,"tick":60}
+boidOps = {"velocity":250}
+sysOps = {"amount":100,"size":5,"length":20,"radius":100,"collisionRadius":10,"tick":60}
 appOps = {"winSize":(1000,1000)}
 
 a = App(boidOps,sysOps,**appOps)
