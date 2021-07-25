@@ -1,0 +1,7 @@
+orange brown green pink olive teal blue black
+black pink yellow orange teal brown green olive
+orange blue pink brown black yellow teal grey
+brown pink yellow black blue grey olive green
+orange black blue teal yellow green brown olive
+pink yellow grey brown green black orange olive
+orange blue pink teal brown olive black grey
