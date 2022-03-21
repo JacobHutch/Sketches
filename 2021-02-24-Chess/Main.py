@@ -11,7 +11,7 @@ class App:
 
         self.compositeColors()
 
-        self.playerCol = "w"
+        #self.playerCol = "w"
 
         self.lastX = 0
         self.lastY = 0
@@ -26,6 +26,7 @@ class App:
         self.mainloop()
 
 
+    # ## I came back to this and this is weird
     # The color system might be kinda confusing, so it could be changed later.
     # colorPalette defines the base colors for the program; bgColor, white, and
     # black are self explanatory, highlight is the color of a square when the

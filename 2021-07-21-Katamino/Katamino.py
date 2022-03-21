@@ -17,8 +17,7 @@ class App:
         self.parseShapes()
         self.parsePuzzles()
         self.createLines()
-        self.solveBrute1(0)
-        print(self.operationsCounter)
+        self.solveBrute()
 
         #self.startPygame()
 
@@ -92,20 +91,26 @@ class App:
 
 
 
-    def solveBrute1(self,index):
+    def solveBrute(self):
+        self.solveBruteRots(0)
+        print(self.operationsCounter)
+
+
+
+    def solveBruteRots(self,index):
         if index < len(self.puzzle):
             for i in range(8):
                 self.pieceConfigs[index] = i
-                self.solveBrute1(index+1)
+                self.solveBruteRots(index+1)
         else:
             self.operationsCounter += 1
-            self.solveBrute2(0)
+            self.solveBruteBoard(0)
 
 
 
-    def solveBrute2(self,index):
+    def solveBruteBoard(self,index):
         if index < len(self.puzzle):
-            self.solveBrute2(index+1)
+            self.solveBruteBoard(index+1)
         else:
             for p in self.puzzle:
                 shape = self.shapes[p]
@@ -156,6 +161,6 @@ class App:
             pygame.display.flip()
             self.clock.tick(60)
 
-appOps = {"winSize":(1000,800),"puzzleName":"c8"}
+appOps = {"winSize":(1000,800),"puzzleName":"c3"}
 
 a = App(**appOps)
