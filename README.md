@@ -18,9 +18,4 @@ Note: I don't really use it anymore
 
 **Note:**
 This repository is mostly for one-offs that I'll make in a day or week
-<<<<<<< HEAD
-and forget about, if a sketch seems worthy enough and I'm not lazy I might
-make it into its own separate repository.
-=======
 and forget about.
->>>>>>> 0472f65fc1ec91fa804a2fdd7a0413696bdf32ef
