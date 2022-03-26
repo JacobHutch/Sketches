@@ -8,7 +8,9 @@ class App:
     def __init__(self,title="Default Title",winSize=(500,500),viewSize=(51,51),worldSize=(100,100)):
         self.title = title
         self.winSize = winSize
-        self.viewSize = viewSize
+        vx,vy = viewSize
+        wx,wy = worldSize
+        self.viewSize = [min(vx,wx),min(vy,wy)]
         self.worldSize = worldSize
 
         self.processes = []
@@ -34,7 +36,7 @@ class App:
         pygame.init()
 
         pygame.display.set_caption(self.title)
-        self.window = pygame.display.set_mode(self.winSize)
+        self.window = pygame.display.set_mode(self.winSize, pygame.RESIZABLE)
         self.running = True
         self.clock = pygame.time.Clock()
 
@@ -43,11 +45,11 @@ class App:
 
 
     def createTiles(self):
+        self.tileSize = min(self.winSize[0]//self.viewSize[0], self.winSize[1]//self.viewSize[1])
+        rectDims = (self.tileSize,self.tileSize)
+
         self.worldXHalf = self.worldSize[0] // 2
         self.worldYHalf = self.worldSize[1] // 2
-
-        self.tileSize = min(self.winSize[0]//max(self.viewSize[0],self.worldSize[0]), self.winSize[1]//max(self.viewSize[1],self.worldSize[1]))
-        rectDims = (self.tileSize,self.tileSize)
 
         self.viewXHalf = self.viewSize[0] // 2
         self.viewYHalf = self.viewSize[1] // 2
@@ -73,9 +75,30 @@ class App:
 
 
     def updatePlayer(self):
-        playerX = (self.tileSize * self.playerPos[0]) + (self.playerPadX // 2) + self.winPadX
-        playerY = (self.tileSize * self.playerPos[1]) + (self.playerPadY // 2) + self.winPadY
-        self.playerRect = pygame.Rect((playerX,playerY),self.playerDims)
+        if self.playerPos[0] < self.viewXHalf:
+            playerX = self.playerPos[0]
+        elif (self.worldSize[0] - self.playerPos[0]) <= self.viewXHalf:
+            playerX = self.viewSize[0] - (self.worldSize[0] - self.playerPos[0])
+        else:
+            playerX = self.viewXHalf
+
+        if self.playerPos[1] < self.viewYHalf:
+            playerY = self.playerPos[1]
+        elif (self.worldSize[1] - self.playerPos[1]) <= self.viewYHalf:
+            playerY = self.viewSize[1] - (self.worldSize[1] - self.playerPos[1])
+        else:
+            playerY = self.viewYHalf
+
+        squareX = (self.tileSize * playerX) + (self.playerPadX // 2) + self.winPadX
+        squareY = (self.tileSize * playerY) + (self.playerPadY // 2) + self.winPadY
+        self.playerRect = pygame.Rect((squareX,squareY),self.playerDims)
+
+
+
+    def resizeWindow(self,newSize):
+        self.winSize = newSize
+        self.createTiles()
+        self.updatePlayer()
 
 
 
@@ -93,16 +116,24 @@ class App:
                         p.kill()
                     pygame.quit()
                     self.running = False
+
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         self.playerPos[1] = UF.clamp(self.playerPos[1]-1,0,self.worldSize[1]-1)
+                        self.updatePlayer()
                     elif event.key == pygame.K_DOWN:
                         self.playerPos[1] = UF.clamp(self.playerPos[1]+1,0,self.worldSize[1]-1)
+                        self.updatePlayer()
                     elif event.key == pygame.K_LEFT:
                         self.playerPos[0] = UF.clamp(self.playerPos[0]-1,0,self.worldSize[0]-1)
+                        self.updatePlayer()
                     elif event.key == pygame.K_RIGHT:
                         self.playerPos[0] = UF.clamp(self.playerPos[0]+1,0,self.worldSize[0]-1)
+                        self.updatePlayer()
                     print(self.playerPos)
+
+                elif event.type == pygame.VIDEORESIZE:
+                    self.resizeWindow([event.w,event.h])
 
             if not self.running:
                 break
@@ -117,8 +148,8 @@ class App:
 
             for x in range(self.viewSize[0]):
                 for y in range(self.viewSize[1]):
-                    wx = UF.clamp(x + self.playerPos[0] - self.viewXHalf, 0, self.worldSize[0] - 1)
-                    wy = UF.clamp(y + self.playerPos[1] - self.viewYHalf, 0, self.worldSize[1] - 1)
+                    wx = UF.clamp(x + self.playerPos[0] - self.viewXHalf, 0 + x, self.worldSize[0] - (self.viewSize[0] - x))
+                    wy = UF.clamp(y + self.playerPos[1] - self.viewYHalf, 0 + y, self.worldSize[1] - (self.viewSize[1] - y))
                     pygame.draw.rect(self.window,self.worldCols[wx][wy],self.tiles[x][y])
 
             pygame.draw.rect(self.window,self.playerCol,self.playerRect)
@@ -138,5 +169,5 @@ class UF:
 
 
 
-appOps = {"title":"Pixel World 2","winSize":(1000,800),"worldSize":(40,40),"viewSize":(75,75)}
+appOps = {"title":"Pixel World 2","winSize":(1000,800),"worldSize":(60,60),"viewSize":(41,41)}
 a = App(**appOps)
