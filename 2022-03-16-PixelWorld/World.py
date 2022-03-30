@@ -1,4 +1,4 @@
-import random
+import random, math
 
 class World:
     def __init__(self,queue,worldSize):
@@ -30,12 +30,15 @@ class World:
 
     def grassGen(self):
         perlinVecs = self.genPerlinVecs(80,80)
-        perlinNoise = self.samplePerlinField(perlinVecs,self.worldSize[0],self.worldSize[1],0.34,0.34,0,0)
+        perlinNoise = self.samplePerlinField(perlinVecs,self.worldSize[0],self.worldSize[1],0.07,0.07,0,0)
         for i in range(self.worldSize[0]):
             row = []
             for j in range(self.worldSize[1]):
-                lum = perlinNoise[i][j]
-                col = [lum,lum,lum]
+                lum = (perlinNoise[i][j] + 1) / 2
+                r = int(lum * lum * random.randint(63,191))
+                g = int(lum * random.randint(127,255))
+                b = int(((1 - lum) ** 2) * random.randint(0,31))
+                col = [r,g,b]
                 row.append(Tile(tuple(col)))
             self.world.append(row)
 
@@ -46,8 +49,9 @@ class World:
         for i in range(sizeX):
             row = []
             for j in range(sizeY):
-                rand = random.uniform(0,1)
-                band = (1 - (rand**2)) ** 0.5
+                theta = random.uniform(0,360)
+                rand = math.cos(theta)
+                band = math.sin(theta)
                 row.append((rand,band))
             vecs.append(row)
         return vecs
@@ -67,6 +71,29 @@ class World:
             posX = i * stepX
             for j in range(sizeY):
                 posY = j * stepY
+
+                if (posX != int(posX)) or (posY != int(posY)):
+                    corners = []
+                    corners.append([int(posX), int(posY)])
+                    corners.append([int(posX)+1, int(posY)])
+                    corners.append([int(posX), int(posY)+1])
+                    corners.append([int(posX)+1, int(posY)+1])
+
+                    cVecs = []
+                    for p in corners:
+                        cVecs.append([posX - p[0], posY - p[1]])
+
+                    dots = []
+                    for n in range(4):
+                        x,y = corners[n]
+                        dots.append(self.dot2D(vecs[x][y],cVecs[n]))
+
+                    x,y = corners[0]
+                    dx = self.smooth(posX - x)
+                    dy = self.smooth(posY - y)
+                    row.append(self.lerp(self.lerp(dots[0],dots[1],dx),self.lerp(dots[2],dots[3],dx),dy))
+                else:
+                    row.append(0)
             noise.append(row)
         return noise
 
@@ -74,6 +101,27 @@ class World:
 
     def samplePerlinPoint(self,vecs,x,y):
         pass
+
+
+
+    def dot2D(self,a,b):
+        return (a[0] * b[0]) + (a[1] * b[1])
+
+
+
+    def normalize2D(self,a):
+        mag = ((a[0] ** 2) + (a[1] ** 2)) ** 0.5
+        return [a[0]/mag, a[1]/mag]
+
+
+
+    def lerp(self,a,b,t):
+        return a + ((b - a) * t)
+
+
+
+    def smooth(self,x):
+        return (((((6 * x) - 15) * x) + 10) * x * x * x)
 
 
 
