@@ -12,6 +12,7 @@ class World:
     def genWorld(self):
         self.world = []
         self.grassGen()
+        #self.randomGen()
         self.pushWorld()
 
 
@@ -20,8 +21,9 @@ class World:
         for i in range(self.worldSize[0]):
             row = []
             for j in range(self.worldSize[1]):
-                randi = random.randint(0,127)
-                col = [127,randi,0]
+                randi = random.randint(0,255)
+                #col = [255,randi,0]
+                col = [randi,randi,randi]
                 random.shuffle(col)
                 row.append(Tile(tuple(col)))
             self.world.append(row)
@@ -38,7 +40,7 @@ class World:
                 r = int(lum * lum * random.randint(63,191))
                 g = int(lum * random.randint(127,255))
                 b = int(((1 - lum) ** 2) * random.randint(0,31))
-                col = [r,g,b]
+                col = [lum*256,lum*256,lum*256]
                 row.append(Tile(tuple(col)))
             self.world.append(row)
 
