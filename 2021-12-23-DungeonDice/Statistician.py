@@ -16,7 +16,7 @@ class Statistician:
             if counts[i] < 2:
                 remainingDice += counts[i]
 
-        
+
 
         report["Counts"] = counts
         report["CurrentPoints"] = currentPoints
