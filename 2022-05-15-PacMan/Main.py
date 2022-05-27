@@ -11,8 +11,18 @@ class App:
         self.leftDrag = False
         self.rightDrag = False
 
-        self.processes = []
+        self.fps = 60
+        self.delta = 1 / self.fps
 
+        self.playerPos = (0,0)
+        self.playerCol = (0,127,0)
+        self.playerVel = 3 * self.delta
+        self.playerRot = "right"
+
+        self.ghostPos = []
+        self.ghostCol = (255,0,0)
+
+        self.processes = []
         self.ghostQueue = mp.Queue(1)
         self.ghostProcess = mp.Process(target=Ghost,kwargs={"queue":self.ghostQueue})
         self.processes.append(self.ghostProcess)
@@ -22,7 +32,7 @@ class App:
             self.mapping = True
         else:
             self.mapping = False
-
+        self.resizeWindow(winSize)
         self.startPygame()
 
 
@@ -73,10 +83,8 @@ class App:
         self.worldXHalf = self.worldSize[0] // 2
         self.worldYHalf = self.worldSize[1] // 2
 
-        self.playerPos = [self.worldXHalf,self.worldYHalf]
         self.playerPadX = 4      #keep even numbers for playerPads
         self.playerPadY = 4
-        self.playerCol = (255,255,255)
         self.playerDims = (self.tileSize-self.playerPadX,self.tileSize-self.playerPadY)
 
         self.winPadX = (self.winSize[0] - (self.tileSize * self.worldSize[0])) // 2
@@ -94,23 +102,37 @@ class App:
 
 
     def updatePlayer(self):
-        if self.playerPos[0] < self.worldXHalf:
-            playerX = self.playerPos[0]
-        elif (self.worldSize[0] - self.playerPos[0]) <= self.worldXHalf:
-            playerX = self.worldSize[0] - (self.worldSize[0] - self.playerPos[0])
-        else:
-            playerX = self.worldXHalf
-
-        if self.playerPos[1] < self.worldYHalf:
-            playerY = self.playerPos[1]
-        elif (self.worldSize[1] - self.playerPos[1]) <= self.worldYHalf:
-            playerY = self.worldSize[1] - (self.worldSize[1] - self.playerPos[1])
-        else:
-            playerY = self.worldYHalf
+        playerX = self.playerPos[0]
+        playerY = self.playerPos[1]
 
         squareX = (self.tileSize * playerX) + (self.playerPadX // 2) + self.winPadX
         squareY = (self.tileSize * playerY) + (self.playerPadY // 2) + self.winPadY
         self.playerRect = pygame.Rect((squareX,squareY),self.playerDims)
+
+
+
+    def movePlayer(self):
+        x,y = self.playerPos
+        xn = x
+        yn = y
+        if self.playerRot == "right":
+            xn += self.playerVel
+            if (self.worldCols[int(xn+1)][round(y)] == (0,0,255)):
+                xn = int(xn)
+        elif self.playerRot == "left":
+            xn = x - self.playerVel
+            if (self.worldCols[int(xn)][round(y)] == (0,0,255)):
+                xn = int(xn+1)
+        elif self.playerRot == "down":
+            yn = y + self.playerVel
+            if (self.worldCols[round(x)][int(yn+1)] == (0,0,255)):
+                yn = int(yn)
+        elif self.playerRot == "up":
+            yn = y - self.playerVel
+            if (self.worldCols[round(x)][int(yn)] == (0,0,255)):
+                yn = int(yn+1)
+
+        self.playerPos = (xn,yn)
 
 
 
@@ -138,17 +160,13 @@ class App:
 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        self.playerPos[1] = UF.clamp(self.playerPos[1]-1,0,self.worldSize[1]-1)
-                        self.updatePlayer()
+                        self.playerRot = "up"
                     elif event.key == pygame.K_DOWN:
-                        self.playerPos[1] = UF.clamp(self.playerPos[1]+1,0,self.worldSize[1]-1)
-                        self.updatePlayer()
+                        self.playerRot = "down"
                     elif event.key == pygame.K_LEFT:
-                        self.playerPos[0] = UF.clamp(self.playerPos[0]-1,0,self.worldSize[0]-1)
-                        self.updatePlayer()
+                        self.playerRot = "left"
                     elif event.key == pygame.K_RIGHT:
-                        self.playerPos[0] = UF.clamp(self.playerPos[0]+1,0,self.worldSize[0]-1)
-                        self.updatePlayer()
+                        self.playerRot = "right"
 
                 elif event.type == pygame.VIDEORESIZE:
                     self.resizeWindow([event.w,event.h])
@@ -162,6 +180,9 @@ class App:
                 except:
                     pass
 
+            self.movePlayer()
+            self.updatePlayer()
+
             self.window.fill((63,63,63))
 
             for x in range(self.worldSize[0]):
@@ -173,7 +194,7 @@ class App:
             pygame.draw.rect(self.window,self.playerCol,self.playerRect)
 
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(self.fps)
 
 
 
@@ -230,6 +251,7 @@ class App:
         self.worldCols = []
 
         #logic for loading is the same as for saving, just loop through y first
+        #by the same logic, the player & ghost positions have to be flipped too
         for y in range(self.worldSize[1]):
             row = []
             colRow = []
@@ -241,9 +263,11 @@ class App:
                 elif val == "w":
                     colRow.append((0,0,255))
                 elif val == "p":
-                    colRow.append((0,127,0))
+                    colRow.append((255,255,255))
+                    self.playerPos = (y,x)
                 elif val == "g":
-                    colRow.append((255,0,0))
+                    colRow.append((255,255,255))
+                    self.ghostPos.append((y,x))
 
             self.map.append(row)
             self.worldCols.append(colRow)
