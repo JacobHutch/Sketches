@@ -55,6 +55,7 @@ class Piece:
         self.special = []
         self.dangers = []
         x,y = self.pos
+        
         if self.type == "p":
             if (y + self.forward >= 0) and (y + self.forward < 8):
                 #movement
@@ -82,6 +83,7 @@ class Piece:
                         self.special.append([x+1,7])
                     if (x-1 >= 0):
                         self.special.append([x-1,7])
+
 
         elif (self.type == "r"):
             for i in range(x+1,8):
@@ -112,6 +114,7 @@ class Piece:
                     self.findAttack([x,i])
                     break
 
+
         elif self.type == "h":
             moves = [(x+1,y+2),(x+1,y-2),(x-1,y+2),(x-1,y-2),(x+2,y+1),(x+2,y-1),(x-2,y+1),(x-2,y-1)]
             for m in moves:
@@ -120,6 +123,7 @@ class Piece:
                         self.moves.append([m[0],m[1]])
                     else:
                         self.findAttack([m[0],m[1]])
+
 
         elif self.type == "b":
             for i in range(x+1,8):
@@ -153,6 +157,7 @@ class Piece:
                     else:
                         self.findAttack([i,y-i+x])
                         break
+
 
         elif self.type == "q":
             for i in range(x+1,8):
@@ -215,6 +220,7 @@ class Piece:
                         self.findAttack([i,y-i+x])
                         break
 
+
         elif self.type == "k":
             moves = [(x+1,y+1),(x+1,y),(x+1,y-1),(x,y-1),(x-1,y-1),(x-1,y),(x-1,y+1),(x,y+1)]
             for m in moves:
@@ -224,8 +230,8 @@ class Piece:
                     else:
                         self.findAttack([m[0],m[1]])
 
-
         self.communicateDangers()
+
 
 
     def findAttack(self,pos):

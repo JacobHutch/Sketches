@@ -18,12 +18,13 @@ class App:
 
         self.board = Board()
 
-        pygame.init()
+        pygame.display.init()
         self.window = pygame.display.set_mode(winSize, pygame.RESIZABLE)
         pygame.display.set_caption(name)
         self.images = Images(self.window)
         self.resize(winSize)
         self.mainloop()
+
 
 
     # ## I came back to this and this is weird
@@ -40,7 +41,7 @@ class App:
         self.colorPalette["bgColor"] = (64,64,128)
         self.colorPalette["white"] = (255,230,180)
         self.colorPalette["black"] = (64,64,46)
-        self.colorPalette["highlight"] = (255,255,255,0.2)
+        self.colorPalette["highlight"] = (255,255,255,0.35)
         self.colorPalette["m-none"] = (0,0,0,0.0)
         self.colorPalette["m-move"] = (0,128,255,0.5)
         self.colorPalette["m-attack"] = (255,0,0,0.75)
@@ -78,6 +79,7 @@ class App:
             print(i,j)'''
 
 
+
     # In board, colors are stored as a list, shown here with ranges:
     # [0:1, 0:1, 0:(m-1)] where m stands for the number of color modifiers.
     # list[0] stands for whether or not the square is highlighted, list[1]
@@ -86,6 +88,12 @@ class App:
     # correct color combination of the 3 values.
     def parseColor(self,colorData):
         return self.colors[(colorData[2] << 2) | (colorData[1] << 1) | colorData[0]]
+
+
+
+    def getOffsetCoords(self,pos):
+        x,y = pos
+        return ((x - self.xOffset) // self.squareSize, (y - self.yOffset) // self.squareSize)
 
 
 
@@ -128,8 +136,7 @@ class App:
                     break
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    x,y = event.pos
-                    x,y = (x - self.xOffset) // self.squareSize, (y - self.yOffset) // self.squareSize
+                    x,y = self.getOffsetCoords(event.pos)
                     if (x >= 0) and (x <= 7) and (y >= 0) and (y <= 7):
                         if self.board.selectSquare([x,y]) == 1:
                             self.display()
@@ -143,9 +150,7 @@ class App:
             if not self.running:
                 break
 
-            x,y = pygame.mouse.get_pos()
-            x = (x - self.xOffset) // self.squareSize
-            y = (y - self.yOffset) // self.squareSize
+            x,y = self.getOffsetCoords(pygame.mouse.get_pos())
             if (x >= 0) and (x <= 7) and (y >= 0) and (y <= 7):
                 self.board.colors[self.lastX][self.lastY][0] = 0
                 if self.board.colors[x][y][0] == 0:

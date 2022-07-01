@@ -36,6 +36,7 @@ class Board:
 
         #Captured pieces, white then black
         self.grid.append([[],[]])
+
         for x in self.grid:
             for y in x:
                 if y:
@@ -65,7 +66,6 @@ class Board:
                         self.colors[x][y][2] = 3
                     else:
                         self.colors[x][y][2] = 1
-                print("ding")
 
         #if a piece is currently selected
         else:
@@ -76,7 +76,6 @@ class Board:
                     x,y = m
                     self.colors[x][y][2] = 0
                 self.selected = None
-                print("dong")
 
             #if piece clicked is a valid move
             elif pos in self.selected.moves:
@@ -92,11 +91,7 @@ class Board:
                 else:
                     self.turn = "w"'''
                 self.selected = None
-                print("bong")
                 ret = 1
-
-            else:
-                print("invalid")
 
         return ret
 

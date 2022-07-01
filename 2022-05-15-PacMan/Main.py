@@ -18,6 +18,7 @@ class App:
         self.playerCol = (0,127,0)
         self.playerVel = 3 * self.delta
         self.playerRot = "right"
+        self.moveQueue = ""
 
         self.ghostPos = []
         self.ghostCol = (255,0,0)
@@ -54,9 +55,7 @@ class App:
     def initFunctions(self):
         if __name__=="__main__":
             self.ghostProcess.start()
-
-        pygame.init()
-
+        pygame.display.init()
         pygame.display.set_caption(self.title)
         self.window = pygame.display.set_mode(self.winSize, pygame.RESIZABLE)
         self.running = True
@@ -115,22 +114,26 @@ class App:
         x,y = self.playerPos
         xn = x
         yn = y
-        if self.playerRot == "right":
-            xn += self.playerVel
-            if (self.worldCols[int(xn+1)][round(y)] == (0,0,255)):
-                xn = int(xn)
-        elif self.playerRot == "left":
-            xn = x - self.playerVel
-            if (self.worldCols[int(xn)][round(y)] == (0,0,255)):
-                xn = int(xn+1)
-        elif self.playerRot == "down":
-            yn = y + self.playerVel
-            if (self.worldCols[round(x)][int(yn+1)] == (0,0,255)):
-                yn = int(yn)
-        elif self.playerRot == "up":
-            yn = y - self.playerVel
-            if (self.worldCols[round(x)][int(yn)] == (0,0,255)):
-                yn = int(yn+1)
+        if self.moveQueue == "right":
+            if (self.playerRot == "right") or (self.playerRot == "left"):
+                xn += self.playerVel
+                if (self.worldCols[int(xn+1)][round(y)] == (0,0,255)):
+                    xn = int(xn)
+        elif self.moveQueue == "left":
+            if (self.playerRot == "right") or (self.playerRot == "left"):
+                xn = x - self.playerVel
+                if (self.worldCols[int(xn)][round(y)] == (0,0,255)):
+                    xn = int(xn+1)
+        elif self.moveQueue == "down":
+            if (self.playerRot == "up") or (self.playerRot == "down"):
+                yn = y + self.playerVel
+                if (self.worldCols[round(x)][int(yn+1)] == (0,0,255)):
+                    yn = int(yn)
+        elif self.moveQueue == "up":
+            if (self.playerRot == "up") or (self.playerRot == "down"):
+                yn = y - self.playerVel
+                if (self.worldCols[round(x)][int(yn)] == (0,0,255)):
+                    yn = int(yn+1)
 
         self.playerPos = (xn,yn)
 
@@ -160,13 +163,13 @@ class App:
 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        self.playerRot = "up"
+                        self.moveQueue = "up"
                     elif event.key == pygame.K_DOWN:
-                        self.playerRot = "down"
+                        self.moveQueue = "down"
                     elif event.key == pygame.K_LEFT:
-                        self.playerRot = "left"
+                        self.moveQueue = "left"
                     elif event.key == pygame.K_RIGHT:
-                        self.playerRot = "right"
+                        self.moveQueue = "right"
 
                 elif event.type == pygame.VIDEORESIZE:
                     self.resizeWindow([event.w,event.h])
