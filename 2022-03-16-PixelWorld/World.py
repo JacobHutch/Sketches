@@ -1,4 +1,4 @@
-import random, math
+import random, math, queue
 
 class World:
     def __init__(self,queue,worldSize):
@@ -11,8 +11,9 @@ class World:
 
     def genWorld(self):
         self.world = []
-        self.grassGen()
+        #self.grassGen()
         #self.randomGen()
+        self.wfcGen()
         self.pushWorld()
 
 
@@ -40,7 +41,7 @@ class World:
                 r = int(lum * lum * random.randint(63,191))
                 g = int(lum * random.randint(127,255))
                 b = int(((1 - lum) ** 2) * random.randint(0,31))
-                col = [lum*256,lum*256,lum*256]
+                col = [r,g,b]
                 row.append(Tile(tuple(col)))
             self.world.append(row)
 
@@ -106,6 +107,90 @@ class World:
 
 
 
+    #Simple 4-color map theorem:
+    #domain: red, yellow, green, and blue tiles
+    #constraints: no color can border itself
+    #superposed is combo of colors, black is contradiction
+    #entropy will be the number of values in the domain
+    def wfcGen(self):
+        #0-red, 1-yellow, 2-green, 3-blue
+        domain = [0,1,2,3]
+        #map of nodes, each node is [domain,color,entropy]
+        nodes = []
+        for i in range(self.worldSize[0]):
+            row = []
+            for j in range(self.worldSize[1]):
+                row.append([domain,self.colorNode(domain),4])
+            nodes.append(row)
+        self.colorWorld(nodes)
+        self.collapseWF(nodes)
+
+
+
+    def colorNode(self,domain):
+        cols = {0:(255,0,0),1:(255,255,0),2:(0,255,0),3:(0,0,255)}
+        if len(domain) == 0: #contradiction state
+            final = (0,0,0)
+        else:
+            count = len(domain)
+            fr,fg,fb = 0,0,0
+            for n in range(count):
+                r,g,b = cols[domain[n]]
+                fr += r/count
+                fg += g/count
+                fb += b/count
+            final = [round(fr),round(fg),round(fb)]
+        return final
+
+
+
+    def colorWorld(self,nodes):
+        self.world = []
+        for i in range(self.worldSize[0]):
+            row = []
+            for j in range(self.worldSize[1]):
+                row.append(Tile(nodes[i][j][1]))
+            self.world.append(row)
+        self.pushWorld()
+
+
+
+    def collapseWF(self,nodes):
+        for n in range((self.worldSize[0]*self.worldSize[1])-1):
+            lowest = []
+            entropy = 0
+            for i in range(self.worldSize[0]):
+                for j in range(self.worldSize[1]):
+                    node = nodes[i][j]
+                    if node[2] <= 4:
+                        if len(lowest) == 0:
+                            lowest.append((i,j))
+                            entropy = node[2]
+                        elif node[2] < entropy:
+                            lowest = []
+                            lowest.append((i,j))
+                            entropy = node[2]
+                        elif node[2] == entropy:
+                            lowest.append((i,j))
+            self.collapseNode(random.choice(lowest),nodes)
+
+
+
+    def collapseNode(self,pos,nodes):
+        x,y = pos
+        node = nodes[x][y]
+        domain = node[0]
+        val = random.choice(domain)
+        node[0] = [val]
+        node[1] = self.colorNode(node[0])
+        node[2] = 5
+        nodes[x][y] = node
+        self.colorWorld(nodes)
+
+
+
+    #Utility Functions
+
     def dot2D(self,a,b):
         return (a[0] * b[0]) + (a[1] * b[1])
 
@@ -119,6 +204,16 @@ class World:
 
     def lerp(self,a,b,t):
         return a + ((b - a) * t)
+
+
+
+    def lerp3D(self,a,b,t):
+        ax,ay,az = a
+        bx,by,bz = b
+        nx = ax + ((bx - ax) * t)
+        ny = ay + ((by - ay) * t)
+        nz = az + ((bz - az) * t)
+        return [nx,ny,nz]
 
 
 

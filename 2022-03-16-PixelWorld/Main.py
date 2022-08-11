@@ -33,7 +33,7 @@ class App:
 
 
     def startPygame(self):
-        pygame.init()
+        pygame.display.init()
 
         pygame.display.set_caption(self.title)
         self.window = pygame.display.set_mode(self.winSize, pygame.RESIZABLE)
@@ -138,11 +138,10 @@ class App:
             if not self.running:
                 break
 
-            if self.worldQueue.full():
-                try:
-                    self.worldCols = self.worldQueue.get_nowait()
-                except:
-                    pass
+            try:
+                self.worldCols = self.worldQueue.get_nowait()
+            except:
+                pass
 
             self.window.fill((63,63,63))
 
