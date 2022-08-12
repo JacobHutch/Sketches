@@ -55,7 +55,7 @@ class Piece:
         self.special = []
         self.dangers = []
         x,y = self.pos
-        
+
         if self.type == "p":
             if (y + self.forward >= 0) and (y + self.forward < 8):
                 #movement
@@ -260,9 +260,18 @@ class Piece:
             if self.type == "p":
                 self.type = "q"
                 self.id = self.color + self.type + str(self.number)
+        print(self.id + ": " + self.moveToStr(self.pos) + " -> " + self.moveToStr(newpos))
         self.grid[x][y] = self
         self.pos = newpos
         self.numMoves += 1
+
+
+
+    def moveToStr(self,pos):
+        x,y = pos
+        x = chr((7 - x) + 65)
+        y = str(y + 1)
+        return x+y
 
 
 
