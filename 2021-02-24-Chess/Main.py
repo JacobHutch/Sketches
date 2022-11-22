@@ -98,7 +98,7 @@ class App:
 
 
     def resize(self,winSize):
-        print(winSize)
+        print("Resize: " + str(winSize))
         self.padding = int(math.log(min(winSize),2))
         self.squareSize = (min(winSize) - self.padding) // 9
         self.xOffset = (winSize[0] - (self.squareSize * 8)) // 2
