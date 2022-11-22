@@ -6,7 +6,7 @@ class System:
 	def __init__(self,minbodies=0,maxbodies=10):
 		self.__minBodies = minbodies
 		self.__maxBodies = maxbodies
-		self.__gravityConstant = 0.01
+		self.__gravityConstant = 6.67 * (10**-11)
 		#random.seed(25)
 		self.__nameGen()
 		self.__systemInit()

@@ -16,7 +16,7 @@ class App:
         self.timeRunning = 0
         self.sliderVal = [7]
         self.sliderStep = 9
-        
+
         self.p = mp.Process(target=Creature,kwargs={"queue":self.queue})
 
         if __name__=="__main__":
