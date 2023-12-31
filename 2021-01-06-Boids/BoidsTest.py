@@ -164,13 +164,13 @@ class App:
             if not self.running:
                 break
 
-            self.window.fill("white")
+            self.window.fill("#0f0f0f")
 
             #boid update
             self.system.updateBoids()
             for boid in self.system.boids:
-                pygame.draw.line(self.window,(0,0,255),boid.position,((math.cos(math.radians(boid.angle)) * self.system.length) + boid.position[0],(math.sin(math.radians(boid.angle)) * self.system.length) + boid.position[1]))
-                pygame.draw.circle(self.window,(0,255,255),boid.position,5)
+                pygame.draw.line(self.window,(0,127,255),boid.position,((math.cos(math.radians(boid.angle)) * self.system.length) + boid.position[0],(math.sin(math.radians(boid.angle)) * self.system.length) + boid.position[1]))
+                pygame.draw.circle(self.window,(64,183,255),boid.position,5)
             pygame.display.flip()
             self.clock.tick(self.tick)
 
